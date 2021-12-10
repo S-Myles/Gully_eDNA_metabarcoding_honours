@@ -1,0 +1,203 @@
+---
+title: "Alpha diversity measures on unfiltered, unstandardized data"
+author: "Shannon Myles"
+date: "2021-12-08"
+output: html_notebook
+---
+# Installing packages as needed & Loading them for the job
+```{r, message=FALSE}
+#install.packages("remotes")
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
+#remotes::install_github("jbisanz/qiime2R")
+#remotes::install_github("joey711/biom")
+#BiocManager::install("phyloseq")
+#install.packages("tidyverse")
+#install.packages("ggplot2")
+
+
+library(phyloseq)     # A data structure / landing place for seq data
+
+# The following interact very well with Phyloseq
+library(qiime2R)      # Importing QIIME artifacts
+library(biom)         # Handling BIOM tables
+library(rbiom)        # More handling BIOM tables
+library(ape)          # Phylogeny handler
+
+# The more typical toolbox
+library(tidyverse)    # Data handling and so much more
+library(reshape2)     # Statistical tool
+library(ggplot2)      # Plotting library
+library(matrixStats)  # More stats
+
+# Setting working directory to access files
+setwd("C:/Users/18192/Documents/DAL/Honours/Qiime2/Final_data")
+```
+
+# metadata pre-processing
+```{r Pre-processing metadata tables, message=FALSE}
+# 12S metadata file
+S12_metadata <-  read_tsv("./12S_exports/metadata12S.tsv") %>%
+  column_to_rownames(var = "sampleid")
+S12_metadata$size_fraction <- paste(as.character(S12_metadata$size_fraction), 'µm')
+S12_metadata <- S12_metadata %>% 
+  mutate(disc_depth = paste(as.character(S12_metadata$depth), 'm')) %>% 
+  mutate(timeofyear = paste(as.character(S12_metadata$year), S12_metadata$season))
+
+S12_samples_names <- c("2014F-GULD04-100mL", "2014F-GULD04-1mL", "2014S-GULD04-250mL", "2016F-GULD4-100m-L", "2016F-GULD4-250m-L", "2016S-GULD3-40m-L", "2017F-GULD04-1mL", "2017S-GULD04-60mL", "2018F-SG23-1mL", "2018F-SG23-20mL", "2018F-SG23-250mL", "2018F-SG23-60mL", "2018S-GULD04-250mL", "2019S-GULD04-1mL", "2019S-GULD04-250mL")
+
+# 16S metadata file
+S16_metadata <-  read_tsv("./16S_exports/metadata.tsv") %>%
+  column_to_rownames(var = "sampleid")
+S16_metadata$size_fraction <- paste(as.character(S16_metadata$size_fraction), 'µm')
+S16_metadata <- S16_metadata %>%
+  mutate(disc_depth = paste(as.character(S16_metadata$depth), 'm')) %>% 
+  mutate(timeofyear = paste(as.character(S16_metadata$year), S16_metadata$season))
+
+S16_samples_names <- c("2014F-GULD04-100mL", "2014F-GULD04-100mS", "2014F-GULD04-1mL",   "2014F-GULD04-1mS",   
+                       "2014F-GULD04-20mL", "2014F-GULD04-20mS","2014F-GULD04-250mL", "2014F-GULD04-250mS", 
+                       "2014S-GULD04-100mL", "2014S-GULD04-100mL" , "2014S-GULD04-1mL", "2014S-GULD04-1mS" ,  
+                       "2014S-GULD04-20mL" , "2014S-GULD04-20mS" , "2014S-GULD04-250mL","2014S-GULD04-250mS", 
+                       "2016F-GULD4-100m-L",  "2016F-GULD4-100m-S" , "2016F-GULD4-1m-L"   , "2016F-GULD4-1m-S" ,  
+                       "2016F-GULD4-20m-L"  , "2016F-GULD4-20m-S" ,  "2016F-GULD4-250m-L" , "2016F-GULD4-250m-S" , 
+                       "2016S-GULD3-1m-L"   ,"2016S-GULD3-1m-S"  ,  "2016S-GULD3-20m-L"  , "2016S-GULD3-20m-S"  , 
+                       "2016S-GULD3-40m-L" ,  "2016S-GULD3-40m-S"  ,"2016S-GULD3-80m-L","2016S-GULD3-80m-S"  , 
+                       "2017F-GULD04-1mL"   , "2017F-GULD04-1mS"  ,  "2017F-GULD04-20mL"  ,"2017F-GULD04-20mS" ,  
+                       "2017F-GULD04-250mL" , "2017F-GULD04-250mS" , "2017F-GULD04-60mL"  , "2017F-GULD04-60mS"  ,
+                       "2017S-GULD04-1mL"  ,  "2017S-GULD04-1mS"   , "2017S-GULD04-20mL" ,  "2017S-GULD04-20mS" ,  
+                       "2017S-GULD04-250mL" ,"2017S-GULD04-250mS"  ,"2017S-GULD04-60mL"  , "2017S-GULD04-60mS"  , 
+                       "2018F-SG23-1mL"    ,  "2018F-SG23-1mS"     ,"2018F-SG23-20mL"    , "2018F-SG23-20mS"    , 
+                       "2018F-SG23-250mL"   , "2018F-SG23-250mS"  ,  "2018F-SG23-60mL", "2018F-SG23-60mS"    , 
+                       "2018S-GULD04-1mS"  ,  "2018S-GULD04-20mL" ,  "2018S-GULD04-20mS" ,  "2018S-GULD04-250mL" ,
+                       "2018S-GULD04-250mS" , "2018S-GULD04-60mL"  , "2018S-GULD04-60mS" ,  "2019S-GULD04-1mS"  ,  
+                       "2019S-GULD04-20mL"  ,"2019S-GULD04-20mS"  , "2019S-GULD04-250mL" , "2019S-GULD04-250mS",  
+                       "2019S-GULD04-60mL",   "2019S-GULD04-60mS" )
+
+# 18S metadata file
+S18_metadata <-  read_tsv("./18S_exports/metadata.tsv") %>%
+  column_to_rownames(var = "sampleid")
+S18_metadata$size_fraction <- paste(as.character(S18_metadata$size_fraction), 'µm')
+S18_metadata <- S18_metadata %>%
+  mutate(disc_depth = paste(as.character(S18_metadata$depth), 'm')) %>% 
+  mutate(timeofyear = paste(as.character(S18_metadata$year), S18_metadata$season))
+
+```
+
+# Taxonomic tables pre-processing
+```{r Pre-processing taxonomic tables, message=FALSE}
+S12_tax <- read_tsv("./12S_exports/taxa_FishCard/taxonomy.tsv") %>%
+  remove_rownames %>%
+  column_to_rownames(var="Feature ID") %>%
+  as.matrix()
+
+#changing the taxonomic level to cut-off their pre-fix
+S16_tax <- read_tsv("./16S_exports/taxa/taxonomy.tsv") %>%
+      mutate_at("domain", str_replace, "D_0__", "")%>%
+      mutate_at("phyla", str_replace, "D_1__", "")%>%
+      mutate_at("class", str_replace, "D_2__", "")%>%
+      mutate_at("order", str_replace, "D_3__", "")%>%
+      mutate_at("family", str_replace, "D_4__", "")%>%
+      mutate_at("genus", str_replace, "D_5__", "")%>%
+      mutate_at("specie", str_replace, "D_6__", "")%>% 
+      remove_rownames %>%
+      column_to_rownames(var="Feature ID") %>%
+      as.matrix()
+
+#changing the taxonomic level to cut-off their pre-fix
+S18_tax <- read_tsv("./18S_exports/taxa_final/taxonomy.tsv") %>%
+      mutate_at("domain", str_replace, "d__", "")%>%
+      mutate_at("phyla", str_replace, "p__", "")%>%
+      mutate_at("class", str_replace, "c__", "")%>%
+      mutate_at("order", str_replace, "o__", "")%>%
+      mutate_at("family", str_replace, "f__", "")%>%
+      mutate_at("genus", str_replace, "g__", "")%>%
+      mutate_at("specie", str_replace, "s__", "")%>% 
+      remove_rownames %>%
+      column_to_rownames(var="Feature ID") %>%
+      as.matrix()
+```
+
+
+
+# Loading in the data to create 1 phyloseq object per marker region
+```{r Loading in various data sets for each marker, further (minimal) pre-processing, & merging into 1 phyloseq object, message=FALSE, warning = FALSE}
+
+# 12S marker
+S12_ASVs <- read_qza("./12S_exports/dada2_output/table.qza")[["data"]] %>%
+  as.data.frame() 
+names(S12_ASVs) <- S12_samples_names
+S12_ASVs <- otu_table(S12_ASVs, taxa_are_rows = TRUE)
+
+S12_tax <- tax_table(S12_tax)
+S12_metadata <- sample_data(S12_metadata)
+
+S12_tree <- read_qza("./12S_exports/asvs-tree.qza")[["data"]] %>%
+  read_tree(taxa_are_rows = TRUE)
+
+
+# 16S marker
+S16_ASVs <- read_qza("./16S_exports/dada2_output/table.qza")[["data"]] %>%
+  as.data.frame() 
+names(S16_ASVs) <- S16_samples_names
+S16_ASVs <- otu_table(S16_ASVs, taxa_are_rows = TRUE)
+
+S16_tax <- tax_table(S16_tax)
+S16_metadata <- sample_data(S16_metadata)
+S16_tree <- read_qza("./16S_exports/asvs-tree.qza")[["data"]] %>%
+  read_tree(taxa_are_rows = TRUE)
+
+
+# 18S marker
+S18_ASVs <- read_qza("./18S_exports/dada2_output/table.qza")[["data"]] %>%
+  as.data.frame() %>%
+  otu_table(taxa_are_rows = TRUE)
+S18_tax <- tax_table(S18_tax)
+S18_metadata <- sample_data(S18_metadata)
+S18_tree <- read_qza("./18S_exports/asvs-tree.qza")[["data"]] %>%
+  read_tree(taxa_are_rows = TRUE)
+
+# Merging data into phyloseq object per marker region
+(S12_physeq <-  merge_phyloseq(S12_ASVs, S12_tax, S12_metadata, S12_tree))
+(S16_physeq <-  merge_phyloseq(S16_ASVs, S16_tax, S16_metadata, S16_tree))
+(S18_physeq <-  merge_phyloseq(S18_ASVs, S18_tax, S18_metadata, S18_tree))
+```
+
+
+```{r agglomerate by family, warning=FALSE}
+(S12_fam <- tax_glom(S12_physeq, "family"))
+(S16_fam <- tax_glom(S16_physeq, "family"))
+(S18_fam <- tax_glom(S18_physeq, "family"))
+```
+
+
+
+```{r Merging phyloseq objects without trees}
+# Merge 16S and 18S Gully data where we have data from both markers (as read counts, at the family level)
+(Gully_1618_fam <- merge_phyloseq(otu_table(S16_fam,taxa_are_rows = T),
+                                 otu_table(S18_fam,taxa_are_rows = T),
+                                 tax_table(S16_fam),
+                                 tax_table(S18_fam),
+                                 sample_data(S18_fam)       # 18S samples because it has one less sample than 16S (from QC)
+                                 ))
+
+# Merge all Gully data for samples where we have 12S data (as read counts, at the family level)
+(Gully_all_fam <- merge_phyloseq(otu_table(S12_fam,taxa_are_rows = T),
+                                 otu_table(S16_fam,taxa_are_rows = T),
+                                 otu_table(S18_fam,taxa_are_rows = T),
+                                 tax_table(S12_fam),
+                                 tax_table(S16_fam),
+                                 tax_table(S18_fam),
+                                 sample_data(S12_fam)
+                                 ))
+
+```
+
+```{r}
+plot_richness(Gully_1618_fam, x="timeofyear", measures=c("Shannon", "Chao1"), color="depth")
+ggsave("AlphaDiv_UnfiltUnstand_1618S_data.png")
+plot_richness(Gully_all_fam, x="timeofyear", measures=c("Shannon", "Chao1"), color="depth")
+ggsave("AlphaDiv_UnfiltUnstand_all_data.png")
+
+```
+
+

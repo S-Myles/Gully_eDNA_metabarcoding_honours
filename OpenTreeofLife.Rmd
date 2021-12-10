@@ -1,0 +1,79 @@
+---
+title: "OpenTree of Life"
+author: "Shannon"
+date: "2021-12-04"
+output: html_notebook
+---
+
+```{r}
+#install.packages("rotl")
+
+library(rotl)
+library(ape)
+```
+
+
+```{r iter_2}
+taxa <- c("Acidobacteria",
+  "Actinobacteria",
+  "Annelida",
+  "Apicomplexa",
+  "Apusomonadidae",
+  "Arthropoda",
+  "Ascomycota",
+  "Bicosoecida",
+  "Centrohelida",
+  "Chlamydiae",
+  "Chlorophyta",
+  "Chordata",
+  "Ciliophora",
+  "Cnidaria",
+  "Ctenophora",
+  "Cyanobacteria",
+  "Dinoflagellata",
+  "Fibrobacteres",
+  "Fusobacteria",
+  "Gemmatimonadetes",
+  "Haptophyta",
+  "Kathablepharidae",
+  "Labyrinthulomycetes",
+  "Lentisphaerae",
+  "MAST-1",
+  "MAST-2",
+  "MAST-4",
+  "MAST-7",
+  "MAST-8",
+  "MAST-9",
+  "Mollusca",
+  "PAUC34f",
+  "Pavlovophyceae",
+  "Peronosporomycetes",
+  "Picozoa",
+  "Planctomycetes",
+  "Alveolata",
+  "Prymnesiophyceae",
+  "Retaria",
+  "Stramenopiles",
+  "Tenericutes",
+  "Thaumarchaeota",
+  "Tunicata",
+  "Verrucomicrobia",
+  "Vibrionales",
+  "vadinHA17",
+  "Rhizaria",
+  "Thermomicrobia",
+  "Hyaloraphidiales",
+  "Rozellida",
+  "Cryptomonadales",
+  "Bacillariophyta",
+  "Jakobida",
+  "Limnochordia",
+  "Choanoflagellida"
+)
+
+(resolved_names <- tnrs_match_names(taxa))
+tree <- tol_induced_subtree(ott_ids = resolved_names$ott_id)
+write.tree(tree, file = "phyla_tree.tre")
+plot(tree)
+```
+

@@ -1,0 +1,35 @@
+Phylum,Order,# Sequences ,# OTU,# Sequences post-filtering,# SNPs on V4 primers,# SNPs on V4 marker,# SNPs on V9 primers,# SNPs on V9 marker
+Annelida,Aciculata,975,457,9,1,16,1,7
+Porifera,Agelasida,970,467,11,1,48,0,14
+Chaetognatha,Aphragmophora,973,444,7,1,20,0,11
+Chordata (Mammalia),Artiodactyla,25,19,5,1,20,0,11
+Arthropoda,Calanoida,977,483,9,1,27,0,9
+Chordata (Mammalia),Carnivora,21,20,4,1,20,0,11
+Ctenophora,Cestida,976,471,9,1,54,0,25
+Ochrophyta (Chrysophyceae),Chromulinales,224,50,5,2,31,0,10
+Chordata (Actinopterygii),Clupeiformes,974,467,9,1,31,0,13
+Chordata (Tunicata),Copelata,970,447,11,1,38,1,20
+Cnidaria,Coronatae,968,452,12,1,50,0,19
+Cryptophyta,Cryptomonadales,455,100,12,2,81,0,42
+Nematoda,Enoplida,965,448,7,1,43,0,15
+Apicomplexa,Eugregarinorida,298,102,14,2,114,2,38
+Ascomycota,Eurotiales,8598,819,16,1,33,0,29
+Bigyra,Labyrinthulida,113,52,13,2,89,0,21
+Chordata (Chondrichthyes),Lamniformes,973,469,9,1,32,0,19
+Radiolaria,Nasselaria,15,15,5,1,45,1,9
+Nematomorpha,Nectonematoidea,960,422,11,1,48,1,29
+Mollusca,Nudibranchia,966,459,11,1,36,0,19
+Echinodermata,Ophiurida,976,444,10,1,29,0,24
+Tardigrada,Parachaela,973,481,8,1,25,0,10
+Dinoflagellata,Peridiniales,547,158,4,1,22,0,13
+Platyhelminthes,Polycladida,975,473,7,1,53,0,21
+Basidiomycota,Polyporales,4645,1132,7,2,27,0,14
+Rotifera,Seisonidae,976,438,9,1,16,0,13
+Chordata (Aves),Suliformes,965,435,10,1,13,0,9
+Chordata (Reptilia),Testudines,973,462,11,1,26,0,20
+Ochrophyta (Bacillariophyceae),Thalassiosirales,1742,197,10,2,49,1,19
+Ciliophora,Tintinnida,535,60,15,2,73,0,17
+23,30,34703,10878,257,36,1226,7,535
+,,,,,,,,
+,artiodactyla families:,"Phocoenidae, Delphinidae, Ziphiidae, Monodontidae, Eschrichtiidae, Balaenopteridae, Balaenidae",,,,,,
+,carnivora families:,"Otariidae, Odobenidae, Phocidae",,,,,,
